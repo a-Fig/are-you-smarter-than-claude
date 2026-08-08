@@ -1,0 +1,140 @@
+.main {
+  --cream: #f5f0e8;
+  --ink: #000000;
+  --coral: #ff5c39;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+  overflow-x: hidden;
+  background: var(--cream);
+  font-family: "Archivo Black", "Arial Black", Arial, sans-serif;
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(28px, 5vw, 56px);
+  text-align: center;
+  max-width: 1100px;
+}
+
+.headline {
+  position: relative;
+  font-size: clamp(1.6rem, 4.6vw, 3.8rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 0;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+
+/* layered sticker-shadow effect behind the headline text */
+.layerShadow {
+  display: block;
+  position: absolute;
+  inset: 0;
+  color: var(--coral);
+  transform: translate(6px, 6px);
+  z-index: 0;
+}
+
+.layerTop {
+  display: block;
+  position: relative;
+  z-index: 1;
+  color: var(--ink);
+}
+
+/* force the headline onto exactly 2 lines always so static text never jumps */
+.line {
+  display: block;
+  white-space: nowrap;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--coral);
+  color: var(--ink);
+  border: 3px solid var(--ink);
+  padding: 0.05em 0.28em;
+  margin: 0 0.06em;
+  box-shadow: 4px 4px 0 var(--ink);
+  white-space: nowrap;
+}
+
+.layerShadow .chip {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--coral);
+}
+
+/* reel window: fixed height, clips everything but the current word.
+   All words live in the DOM at once, so the chip is always sized to the
+   widest word and never jitters. */
+.reelWord {
+  display: inline-block;
+  position: relative;
+  height: 1.15em;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+
+.reelTrack {
+  display: flex;
+  flex-direction: column;
+}
+
+.reelTrack span {
+  display: block;
+  height: 1.15em;
+  line-height: 1.15em;
+  white-space: nowrap;
+}
+
+.playBtn {
+  display: inline-block;
+  font-family: "Archivo Black", "Arial Black", Arial, sans-serif;
+  text-transform: uppercase;
+  text-decoration: none;
+  font-size: clamp(1.1rem, 2.6vw, 1.6rem);
+  letter-spacing: 0.05em;
+  color: var(--ink);
+  background: var(--coral);
+  border: 4px solid var(--ink);
+  padding: 0.7em 2.2em;
+  box-shadow: 6px 6px 0 var(--ink);
+  transform: translate(0, 0);
+  transition: transform 90ms linear, box-shadow 90ms linear;
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.playBtn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.playBtn:active {
+  transform: translate(6px, 6px);
+  box-shadow: 0 0 0 var(--ink);
+}
+
+@media (max-width: 480px) {
+  .headline {
+    letter-spacing: -0.02em;
+    font-size: clamp(1.15rem, 7.2vw, 3.8rem);
+  }
+  .chip {
+    border-width: 2px;
+    box-shadow: 3px 3px 0 var(--ink);
+    padding: 0.05em 0.2em;
+  }
+}

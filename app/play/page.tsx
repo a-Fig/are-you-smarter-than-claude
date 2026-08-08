@@ -51,54 +51,47 @@ const GAMES: {
   },
 ];
 
+const BRUTAL_FONT = "[font-family:'Archivo_Black','Arial_Black',Arial,sans-serif]";
+
 export default function Play() {
   return (
-    <main className="flex flex-1 flex-col items-center gap-10 px-6 py-16">
+    <main
+      className={`flex flex-1 flex-col items-center gap-10 bg-[#F5F0E8] px-6 py-16 text-black ${BRUTAL_FONT}`}
+    >
       <div className="text-center">
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          Pick your game
+        <h1 className="text-3xl uppercase tracking-tight sm:text-5xl">
+          Pick your{" "}
+          <span className="inline-block border-3 border-black bg-[#FF5C39] px-2 shadow-[4px_4px_0_#000]">
+            game
+          </span>
         </h1>
-        <p className="mt-2 text-muted">
+        <p className="mt-4 font-sans text-sm font-medium uppercase tracking-wide text-black/70">
           Every match is timed and metered. Even when you lose, you were cheaper.
         </p>
       </div>
 
-      <div className="grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2">
-        {GAMES.map((g) =>
-          g.live ? (
-            <Link
-              key={g.slug}
-              href={`/play/${g.slug}`}
-              className="group flex flex-col gap-2 rounded-3xl border border-border bg-white/40 p-6 text-left transition-colors hover:border-accent hover:bg-white/70"
-            >
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold tracking-tight group-hover:text-accent">
-                  {g.name}
-                </h2>
-                <span className="text-xs font-medium uppercase tracking-wider text-muted">
-                  {g.odds}
-                </span>
-              </div>
-              <p className="text-sm text-muted">{g.blurb}</p>
-            </Link>
-          ) : (
-            <div
-              key={g.slug}
-              className="flex flex-col gap-2 rounded-3xl border border-dashed border-border p-6 text-left opacity-60"
-            >
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold tracking-tight">{g.name}</h2>
-                <span className="text-xs font-medium uppercase tracking-wider text-muted">
-                  soon
-                </span>
-              </div>
-              <p className="text-sm text-muted">{g.blurb}</p>
+      <div className="grid w-full max-w-3xl grid-cols-1 gap-6 sm:grid-cols-2">
+        {GAMES.filter((g) => g.live).map((g) => (
+          <Link
+            key={g.slug}
+            href={`/play/${g.slug}`}
+            className="group flex flex-col gap-3 border-4 border-black bg-white p-6 text-left shadow-[6px_6px_0_#000] transition-[transform,box-shadow] duration-100 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0_#000] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <h2 className="text-lg uppercase leading-tight sm:text-xl">{g.name}</h2>
+              <span className="shrink-0 border-2 border-black bg-[#FF5C39] px-2 py-0.5 text-[10px] uppercase tracking-wide shadow-[2px_2px_0_#000]">
+                {g.odds}
+              </span>
             </div>
-          ),
-        )}
+            <p className="font-sans text-sm font-medium text-black/70">{g.blurb}</p>
+          </Link>
+        ))}
       </div>
 
-      <Link href="/" className="text-sm font-medium text-accent hover:underline">
+      <Link
+        href="/"
+        className="border-3 border-black bg-[#FF5C39] px-6 py-2 text-sm uppercase tracking-wide shadow-[4px_4px_0_#000] transition-[transform,box-shadow] duration-100 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#000]"
+      >
         Back home
       </Link>
     </main>

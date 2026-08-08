@@ -146,7 +146,7 @@ export default function Connect4Page() {
           </button>
         ))}
       </div>
-      <p className="text-xs text-muted">You are red. Click a column to drop your disc.</p>
+      <p className="text-xs text-muted">Your discs are black, Claude&apos;s are orange. Click a column to drop.</p>
     </GameShell>
   );
 }

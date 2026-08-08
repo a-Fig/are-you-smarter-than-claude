@@ -4,6 +4,7 @@ import { connect4 } from "./connect4";
 import { wordle } from "./wordle";
 import { trivia } from "./trivia";
 import { battleship } from "./battleship";
+import { rps } from "./rps";
 
 // Register every game engine here. Server-only import surface for the
 // move route; client pages import their engine module directly.
@@ -14,4 +15,5 @@ export const GAME_REGISTRY: Record<string, GameEngine<any>> = {
   [wordle.id]: wordle,
   [trivia.id]: trivia,
   [battleship.id]: battleship,
+  [rps.id]: rps,
 };

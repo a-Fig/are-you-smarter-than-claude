@@ -36,6 +36,13 @@ const GAMES: {
     live: true,
   },
   {
+    slug: "rps",
+    name: "Rock-Paper-Scissors",
+    blurb: "Best of 7. Claude studies your past throws and hunts for patterns.",
+    odds: "Mind games",
+    live: true,
+  },
+  {
     slug: "trivia",
     name: "Trivia",
     blurb: "Movies, history, math, or Bay Area. Real quiz questions, head to head.",

@@ -12,11 +12,11 @@ export function ModelPicker({
   locked: boolean;
 }) {
   return (
-    <div className="flex flex-col items-center gap-1.5">
-      <span className="text-xs uppercase tracking-[0.15em] text-muted">
+    <div className="flex flex-col items-center gap-2">
+      <span className="text-[10px] uppercase tracking-[0.2em] text-black/70">
         Your opponent
       </span>
-      <div className="flex gap-2" role="radiogroup" aria-label="Opponent model">
+      <div className="flex flex-wrap justify-center gap-3" role="radiogroup" aria-label="Opponent model">
         {MODEL_KEYS.map((key) => {
           const m = MODELS[key];
           const selected = key === value;
@@ -28,14 +28,14 @@ export function ModelPicker({
               disabled={locked && !selected}
               onClick={() => !locked && onChange(key)}
               title={m.tagline}
-              className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+              className={`border-2 border-black px-4 py-1.5 text-sm uppercase transition-[transform,box-shadow] duration-100 ${
                 selected
-                  ? "border-accent bg-accent text-accent-foreground"
-                  : "border-border bg-transparent text-foreground hover:border-accent"
+                  ? "translate-x-[2px] translate-y-[2px] bg-[#FF5C39] shadow-[1px_1px_0_#000]"
+                  : "bg-white shadow-[3px_3px_0_#000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0_#000]"
               } ${locked && !selected ? "opacity-40" : ""}`}
             >
               {m.label}
-              <span className={`ml-1.5 text-xs ${selected ? "opacity-80" : "text-muted"}`}>
+              <span className="ml-1.5 font-sans text-[10px] font-bold normal-case text-black/60">
                 {m.tagline}
               </span>
             </button>

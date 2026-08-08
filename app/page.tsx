@@ -44,17 +44,25 @@ function useReel(words: string[], intervalMs: number) {
     };
   }, [words, intervalMs]);
 
-  const track = (ref: typeof topRef) => (
+  return { topRef, shadowRef };
+}
+
+function ReelTrack({
+  words,
+  trackRef,
+}: {
+  words: string[];
+  trackRef: React.Ref<HTMLSpanElement>;
+}) {
+  return (
     <span className={styles.reelWord}>
-      <span className={styles.reelTrack} ref={ref}>
+      <span className={styles.reelTrack} ref={trackRef}>
         {[...words, words[0]].map((w, i) => (
           <span key={i}>{w}</span>
         ))}
       </span>
     </span>
   );
-
-  return { top: track(topRef), shadow: track(shadowRef) };
 }
 
 export default function Home() {
@@ -67,18 +75,32 @@ export default function Home() {
         <h1 className={styles.headline} aria-live="polite">
           <span className={styles.layerShadow} aria-hidden="true">
             <span className={styles.line}>
-              Are you <span className={styles.chip}>{adj.shadow}</span>
+              Are you{" "}
+              <span className={styles.chip}>
+                <ReelTrack words={ADJS} trackRef={adj.shadowRef} />
+              </span>
             </span>
             <span className={styles.line}>
-              than <span className={styles.chip}>{model.shadow}</span>?
+              than{" "}
+              <span className={styles.chip}>
+                <ReelTrack words={MODELS} trackRef={model.shadowRef} />
+              </span>
+              ?
             </span>
           </span>
           <span className={styles.layerTop}>
             <span className={styles.line}>
-              Are you <span className={styles.chip}>{adj.top}</span>
+              Are you{" "}
+              <span className={styles.chip}>
+                <ReelTrack words={ADJS} trackRef={adj.topRef} />
+              </span>
             </span>
             <span className={styles.line}>
-              than <span className={styles.chip}>{model.top}</span>?
+              than{" "}
+              <span className={styles.chip}>
+                <ReelTrack words={MODELS} trackRef={model.topRef} />
+              </span>
+              ?
             </span>
           </span>
         </h1>

@@ -16,11 +16,11 @@ function randomSecret(): string {
 
 function Tile({ letter, mark, revealed }: { letter: string; mark?: string; revealed: boolean }) {
   const base =
-    "flex h-11 w-11 items-center justify-center rounded-lg border text-lg font-semibold uppercase sm:h-12 sm:w-12";
-  let colors = "border-border bg-white/40 text-foreground";
-  if (mark === "G") colors = "border-green-600 bg-green-600 text-white";
-  else if (mark === "Y") colors = "border-amber-500 bg-amber-500 text-white";
-  else if (mark === "-") colors = "border-border bg-neutral-300 text-white";
+    "flex h-11 w-11 items-center justify-center border-2 border-black text-lg uppercase sm:h-12 sm:w-12";
+  let colors = "bg-white text-black";
+  if (mark === "G") colors = "bg-green-600 text-white";
+  else if (mark === "Y") colors = "bg-amber-400 text-black";
+  else if (mark === "-") colors = "bg-neutral-400 text-white";
   return <div className={`${base} ${colors}`}>{revealed ? letter : ""}</div>;
 }
 
@@ -179,12 +179,16 @@ export default function WordlePage() {
         error={error}
       >
         <div className="flex flex-col items-center gap-8 sm:flex-row sm:items-start sm:justify-center">
-          <div className="flex flex-col items-center gap-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-muted">You</span>
+          <div className="flex flex-col items-center gap-3">
+            <span className="border-2 border-black bg-white px-3 py-0.5 text-xs uppercase tracking-[0.2em] shadow-[3px_3px_0_#000]">
+              You
+            </span>
             <Board guesses={humanGuesses} feedback={humanFeedback} revealed />
           </div>
-          <div className="flex flex-col items-center gap-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-muted">Claude</span>
+          <div className="flex flex-col items-center gap-3">
+            <span className="border-2 border-black bg-white px-3 py-0.5 text-xs uppercase tracking-[0.2em] shadow-[3px_3px_0_#000]">
+              Claude
+            </span>
             <Board guesses={claudeGuesses} feedback={claudeFeedback} revealed={!!outcome} />
           </div>
         </div>
@@ -194,7 +198,7 @@ export default function WordlePage() {
             e.preventDefault();
             void submitGuess();
           }}
-          className="flex items-center gap-2"
+          className="flex items-center gap-3"
         >
           <input
             type="text"
@@ -204,25 +208,31 @@ export default function WordlePage() {
             onChange={(e) => setInput(e.target.value.replace(/[^a-zA-Z]/g, "").toLowerCase())}
             placeholder="guess"
             autoFocus
-            className="w-32 rounded-full border border-border bg-white/60 px-4 py-2 text-center text-lg font-medium uppercase tracking-widest outline-none focus:border-accent"
+            className="w-36 border-3 border-black bg-white px-4 py-2 text-center text-lg uppercase tracking-widest text-black shadow-[3px_3px_0_#000] outline-none placeholder:text-black/30 focus:border-black disabled:opacity-50"
           />
           <button
             type="submit"
             disabled={thinking || !!outcome || input.length !== 5}
-            className="rounded-full bg-accent px-5 py-2 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="border-3 border-black bg-[#FF5C39] px-6 py-2 text-sm uppercase tracking-wide shadow-[4px_4px_0_#000] transition-[transform,box-shadow] duration-100 hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0_#000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none disabled:translate-x-0 disabled:translate-y-0 disabled:opacity-40 disabled:shadow-[4px_4px_0_#000]"
           >
             Guess
           </button>
         </form>
-        <p className="text-xs text-muted">
+        <p className="font-sans text-xs font-bold text-black/60">
           Guess the secret 5-letter word before Claude does. {guessesLeft} guess
           {guessesLeft === 1 ? "" : "es"} left.
         </p>
       </GameShell>
       {outcome && (
-        <p className="pb-10 text-center text-sm text-muted">
-          The word was <span className="font-semibold text-foreground">{secret.toUpperCase()}</span>.
-        </p>
+        <div className="flex justify-center bg-[#F5F0E8] pb-10">
+          <p className="border-2 border-black bg-white px-4 py-2 text-center font-sans text-sm font-bold text-black shadow-[3px_3px_0_#000]">
+            The word was{" "}
+            <span className="border-2 border-black bg-[#FF5C39] px-1.5 uppercase">
+              {secret.toUpperCase()}
+            </span>
+            .
+          </p>
+        </div>
       )}
     </>
   );

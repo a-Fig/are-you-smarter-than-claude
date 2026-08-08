@@ -212,30 +212,32 @@ export default function TriviaPage() {
       error={error}
     >
       {!category || !current ? (
-        <div className="flex w-full max-w-md flex-col gap-4">
-          <p className="text-center text-sm text-muted">
+        <div className="flex w-full max-w-md flex-col gap-5">
+          <p className="text-center font-sans text-sm font-medium uppercase tracking-wide text-black/70">
             Pick a category. Ten questions, you against Claude.
           </p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             {CATEGORIES.map((c) => (
               <button
                 key={c.key}
                 onClick={() => startCategory(c)}
                 disabled={loading}
-                className="flex h-28 flex-col items-start justify-end rounded-3xl border border-border bg-white/40 p-4 text-left transition-colors hover:border-accent hover:bg-white/70 disabled:opacity-50"
+                className="flex h-28 flex-col items-start justify-end gap-1 border-4 border-black bg-white p-4 text-left shadow-[6px_6px_0_#000] transition-[transform,box-shadow] duration-100 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0_#000] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none disabled:opacity-50"
               >
-                <span className="text-lg font-semibold tracking-tight">{c.label}</span>
-                <span className="text-xs text-muted">{c.blurb}</span>
+                <span className="text-lg uppercase leading-tight">{c.label}</span>
+                <span className="font-sans text-xs font-medium text-black/60">{c.blurb}</span>
               </button>
             ))}
           </div>
           {loading && (
-            <p className="text-center text-sm text-muted">Loading questions…</p>
+            <p className="text-center font-sans text-sm font-bold uppercase tracking-wide text-black/60">
+              Loading questions…
+            </p>
           )}
           {error && !loading && (
             <button
               onClick={rematch}
-              className="self-center rounded-full border border-border px-6 py-2 text-sm font-medium hover:border-accent"
+              className="self-center border-3 border-black bg-white px-6 py-2 text-sm uppercase tracking-wide shadow-[4px_4px_0_#000] transition-[transform,box-shadow] duration-100 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#000]"
             >
               Try again
             </button>
@@ -243,18 +245,20 @@ export default function TriviaPage() {
         </div>
       ) : (
         <div className="flex w-full max-w-md flex-col gap-4">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted">
+          <div className="flex items-center justify-between gap-3 text-[11px] uppercase tracking-wide sm:text-xs">
+            <span className="text-black/60">
               Question {index + 1} / {questions.length}
             </span>
-            <span className="font-medium">
+            <span>
               You {humanScore} — {claudeScore} Claude
             </span>
           </div>
 
-          <div className="rounded-3xl border border-border bg-white/60 p-5">
-            <p className="text-xs uppercase tracking-wide text-muted">{category.label}</p>
-            <p className="mt-2 text-lg font-medium leading-snug">{current.question}</p>
+          <div className="border-4 border-black bg-white p-5 shadow-[6px_6px_0_#000]">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-black/60">
+              {category.label}
+            </p>
+            <p className="mt-2 font-sans text-lg font-bold leading-snug">{current.question}</p>
           </div>
 
           <div className="flex flex-col gap-2">
@@ -263,13 +267,13 @@ export default function TriviaPage() {
               const youPicked = humanPick === i;
               const claudePicked = claudePick === i;
 
-              let tone = "border-border bg-white/40";
+              let tone = "bg-white";
               if (revealed && isCorrect) {
-                tone = "border-emerald-600 bg-emerald-50";
+                tone = "bg-green-600 text-white";
               } else if (revealed && (youPicked || claudePicked)) {
-                tone = "border-red-400 bg-red-50";
+                tone = "bg-[#FF5C39]";
               } else if (youPicked) {
-                tone = "border-accent bg-white/70";
+                tone = "bg-[#FF5C39]";
               }
 
               return (
@@ -277,19 +281,21 @@ export default function TriviaPage() {
                   key={i}
                   onClick={() => answer(i)}
                   disabled={humanPick !== null || thinking}
-                  className={`flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left text-sm transition-colors ${tone} ${
-                    humanPick === null && !thinking ? "hover:border-accent hover:bg-white/70" : ""
+                  className={`flex w-full items-center justify-between gap-3 border-3 border-black px-4 py-3 text-left font-sans text-sm font-bold shadow-[4px_4px_0_#000] transition-[transform,box-shadow] duration-100 ${tone} ${
+                    humanPick === null && !thinking
+                      ? "hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0_#000]"
+                      : ""
                   }`}
                 >
                   <span>{option}</span>
-                  <span className="flex shrink-0 gap-1 text-xs font-medium">
+                  <span className="flex shrink-0 gap-1 text-[10px] uppercase tracking-wide">
                     {youPicked && (
-                      <span className="rounded-full bg-accent px-2 py-0.5 text-accent-foreground">
+                      <span className="border-2 border-black bg-[#FF5C39] px-1.5 py-0.5 text-black">
                         You
                       </span>
                     )}
                     {claudePicked && (
-                      <span className="rounded-full border border-border bg-white/70 px-2 py-0.5">
+                      <span className="border-2 border-black bg-white px-1.5 py-0.5 text-black">
                         Claude
                       </span>
                     )}
@@ -299,12 +305,16 @@ export default function TriviaPage() {
             })}
           </div>
 
-          {thinking && <p className="text-center text-sm text-muted">Claude is answering…</p>}
+          {thinking && (
+            <p className="text-center font-sans text-sm font-bold uppercase tracking-wide text-black/60">
+              Claude is answering…
+            </p>
+          )}
 
           {!thinking && humanPick !== null && !revealed && (
             <button
               onClick={retryClaude}
-              className="self-center rounded-full border border-border px-6 py-2 text-sm font-medium hover:border-accent"
+              className="self-center border-3 border-black bg-white px-6 py-2 text-sm uppercase tracking-wide shadow-[4px_4px_0_#000] transition-[transform,box-shadow] duration-100 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#000]"
             >
               Ask Claude again
             </button>
@@ -313,13 +323,13 @@ export default function TriviaPage() {
           {revealed && (
             <button
               onClick={nextQuestion}
-              className="self-center rounded-full bg-accent px-6 py-2 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
+              className="self-center border-3 border-black bg-[#FF5C39] px-6 py-2 text-sm uppercase tracking-wide shadow-[4px_4px_0_#000] transition-[transform,box-shadow] duration-100 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
             >
               {index + 1 >= questions.length ? "See results" : "Next question"}
             </button>
           )}
 
-          <p className="text-xs text-muted">
+          <p className="text-center font-sans text-[11px] font-medium uppercase tracking-wide text-black/60">
             You answer first; Claude gets the same question, unseen.
           </p>
         </div>

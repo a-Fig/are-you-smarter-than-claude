@@ -94,22 +94,26 @@ export default function TicTacToePage() {
       onRematch={rematch}
       error={error}
     >
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-3">
         {board.map((cell, i) => (
           <button
             key={i}
             onClick={() => play(i)}
             disabled={cell !== null || thinking}
             aria-label={`Cell ${Math.floor(i / 3)},${i % 3}`}
-            className={`flex h-24 w-24 items-center justify-center rounded-2xl border border-border bg-white/40 text-4xl font-semibold transition-colors ${
-              cell === null && !thinking ? "hover:border-accent hover:bg-white/70" : ""
-            } ${cell === "X" ? "text-foreground" : "text-accent"}`}
+            className={`flex h-24 w-24 items-center justify-center border-3 border-black bg-white text-4xl uppercase leading-none shadow-[4px_4px_0_#000] transition-[transform,box-shadow] duration-100 ${
+              cell === null && !thinking
+                ? "hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0_#000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
+                : ""
+            } ${cell === "X" ? "text-black" : "text-[#FF5C39]"}`}
           >
             {cell}
           </button>
         ))}
       </div>
-      <p className="text-xs text-muted">You are X. Click a square to move.</p>
+      <p className="font-sans text-xs font-bold uppercase tracking-wide text-black/60">
+        You are X. Click a square to move.
+      </p>
     </GameShell>
   );
 }

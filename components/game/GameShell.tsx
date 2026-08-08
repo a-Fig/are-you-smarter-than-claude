@@ -9,6 +9,9 @@ import { ModelPicker } from "./ModelPicker";
 import { StatsBar } from "./StatsBar";
 import { ResultCard, type Outcome } from "./ResultCard";
 
+export const BRUTAL_FONT =
+  "[font-family:'Archivo_Black','Arial_Black',Arial,sans-serif]";
+
 /**
  * Standard chrome for every game page: header + model picker + live
  * scoreboard + trash-talk bubble + result card. The game board goes in
@@ -41,23 +44,30 @@ export function GameShell({
 }) {
   const modelLabel = MODELS[model].label;
   return (
-    <main className="flex flex-1 flex-col items-center gap-6 px-6 py-12">
-      <header className="flex w-full max-w-md items-center justify-between">
-        <Link href="/play" className="text-sm font-medium text-accent hover:underline">
+    <main
+      className={`flex flex-1 flex-col items-center gap-6 bg-[#F5F0E8] px-6 py-10 text-black ${BRUTAL_FONT}`}
+    >
+      <header className="flex w-full max-w-md items-center justify-between gap-3">
+        <Link
+          href="/play"
+          className="border-2 border-black bg-white px-3 py-1 text-xs uppercase tracking-wide shadow-[3px_3px_0_#000] transition-[transform,box-shadow] duration-100 hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0_#000]"
+        >
           ← Games
         </Link>
-        <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
-        <span className="w-14" />
+        <h1 className="text-xl uppercase tracking-tight sm:text-2xl">{title}</h1>
+        <span className="w-16" />
       </header>
 
       <ModelPicker value={model} onChange={onModelChange} locked={modelLocked} />
       <StatsBar stats={stats} modelLabel={modelLabel} thinking={thinking} />
 
-      <div className="flex min-h-6 items-center px-4 text-center">
+      <div className="flex min-h-8 items-center px-4 text-center">
         {error ? (
-          <p className="text-sm font-medium text-red-600">{error}</p>
+          <p className="border-2 border-black bg-[#FF5C39] px-3 py-1 font-sans text-sm font-bold text-black shadow-[3px_3px_0_#000]">
+            {error}
+          </p>
         ) : trashTalk ? (
-          <p className="max-w-md text-sm italic text-muted">
+          <p className="max-w-md border-2 border-black bg-white px-3 py-1 font-sans text-sm font-medium italic shadow-[3px_3px_0_#000]">
             “{trashTalk}” — {modelLabel}
           </p>
         ) : null}

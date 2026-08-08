@@ -12,12 +12,16 @@ function Verdict({ label, you, claude, winner }: {
   winner: "you" | "claude" | "tie";
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 border-b border-border py-2 text-sm last:border-b-0">
-      <span className="w-20 text-left font-medium capitalize">{label}</span>
-      <span className={winner === "you" ? "font-semibold text-accent" : "text-muted"}>
+    <div className="flex items-center justify-between gap-4 border-b-2 border-black py-2 text-sm last:border-b-0">
+      <span className="w-20 text-left uppercase">{label}</span>
+      <span
+        className={`font-sans font-bold ${winner === "you" ? "bg-[#FF5C39] px-1.5 text-black" : "text-black/50"}`}
+      >
         You: {you}
       </span>
-      <span className={winner === "claude" ? "font-semibold text-accent" : "text-muted"}>
+      <span
+        className={`font-sans font-bold ${winner === "claude" ? "bg-[#FF5C39] px-1.5 text-black" : "text-black/50"}`}
+      >
         Claude: {claude}
       </span>
     </div>
@@ -60,10 +64,12 @@ export function ResultCard({
       : null;
 
   return (
-    <div className="flex w-full max-w-md flex-col items-center gap-4 rounded-3xl border border-border bg-white/60 p-6 shadow-sm">
-      <h2 className="text-2xl font-semibold tracking-tight">{headline}</h2>
+    <div className="flex w-full max-w-md flex-col items-center gap-4 border-4 border-black bg-white p-6 shadow-[8px_8px_0_#000]">
+      <h2 className="text-center text-2xl uppercase tracking-tight">{headline}</h2>
       {consolation && (
-        <p className="text-sm text-muted">…but hey, you were {consolation}.</p>
+        <p className="font-sans text-sm font-bold text-black/70">
+          …but hey, you were {consolation}.
+        </p>
       )}
       <div className="w-full">
         <Verdict
@@ -78,23 +84,18 @@ export function ResultCard({
           claude={fmtSeconds(stats.claude.timeMs)}
           winner={fasterWinner}
         />
-        <Verdict
-          label="cheaper"
-          you="$0.00"
-          claude={fmtUsd(stats.claude.costUsd)}
-          winner="you"
-        />
+        <Verdict label="cheaper" you="$0.00" claude={fmtUsd(stats.claude.costUsd)} winner="you" />
       </div>
-      <div className="flex gap-3 pt-1">
+      <div className="flex gap-4 pt-1">
         <button
           onClick={onRematch}
-          className="rounded-full bg-accent px-6 py-2 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
+          className="border-3 border-black bg-[#FF5C39] px-6 py-2 text-sm uppercase tracking-wide shadow-[4px_4px_0_#000] transition-[transform,box-shadow] duration-100 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
         >
           Rematch
         </button>
         <Link
           href="/play"
-          className="rounded-full border border-border px-6 py-2 text-sm font-medium hover:border-accent"
+          className="border-3 border-black bg-white px-6 py-2 text-sm uppercase tracking-wide shadow-[4px_4px_0_#000] transition-[transform,box-shadow] duration-100 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#000]"
         >
           All games
         </Link>

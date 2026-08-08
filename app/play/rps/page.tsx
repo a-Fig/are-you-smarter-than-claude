@@ -114,46 +114,58 @@ export default function RPSPage() {
       error={error}
     >
       <div className="flex flex-col items-center gap-6">
-        <p className="text-sm font-medium text-muted">
+        <p className="text-xs uppercase tracking-wide sm:text-sm">
           You {humanWins} — {claudeWins} Claude, first to {WIN_TARGET}
         </p>
 
-        <div className="flex min-h-32 w-full max-w-md items-center justify-center gap-8 rounded-2xl border border-border bg-white/40 px-6 py-6">
+        <div className="flex min-h-32 w-full max-w-md items-center justify-center gap-6 border-4 border-black bg-white px-6 py-6 shadow-[6px_6px_0_#000]">
           {thinking ? (
-            <p className="text-sm text-muted">Claude is thinking…</p>
+            <p className="font-sans text-sm font-bold uppercase tracking-wide text-black/60">
+              Claude is thinking…
+            </p>
           ) : reveal ? (
             <>
               <div className="flex flex-col items-center gap-2">
-                <span className="text-6xl">{emojiFor(reveal.human)}</span>
-                <span className="text-xs text-muted">You</span>
+                <span className="text-6xl leading-none">{emojiFor(reveal.human)}</span>
+                <span className="border-2 border-black bg-white px-2 py-0.5 text-[10px] uppercase tracking-wide shadow-[2px_2px_0_#000]">
+                  You
+                </span>
               </div>
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-lg font-semibold">vs</span>
-                <span className="text-sm font-medium">{resultLine}</span>
+              <div className="flex flex-col items-center gap-2 text-center">
+                <span className="text-lg uppercase">vs</span>
+                <span className="font-sans text-sm font-bold uppercase leading-tight">
+                  {resultLine}
+                </span>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <span className="text-6xl">{emojiFor(reveal.claude)}</span>
-                <span className="text-xs text-muted">Claude</span>
+                <span className="text-6xl leading-none">{emojiFor(reveal.claude)}</span>
+                <span className="border-2 border-black bg-[#FF5C39] px-2 py-0.5 text-[10px] uppercase tracking-wide shadow-[2px_2px_0_#000]">
+                  Claude
+                </span>
               </div>
             </>
           ) : (
-            <p className="text-sm text-muted">Pick your throw to start round 1.</p>
+            <p className="font-sans text-sm font-medium uppercase tracking-wide text-black/60">
+              Pick your throw to start round 1.
+            </p>
           )}
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex gap-5">
           {THROWS.map(({ value, emoji, label }) => (
             <button
               key={value}
               onClick={() => play(value)}
               disabled={thinking || outcome !== null}
               aria-label={label}
-              className={`flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-2xl border border-border bg-white/40 text-4xl transition-colors ${
-                !thinking && !outcome ? "hover:border-accent hover:bg-white/70" : ""
+              className={`flex h-24 w-24 flex-col items-center justify-center gap-1 border-4 border-black bg-white text-4xl shadow-[6px_6px_0_#000] transition-[transform,box-shadow] duration-100 ${
+                !thinking && !outcome
+                  ? "hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0_#000] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none"
+                  : "opacity-50"
               }`}
             >
-              <span>{emoji}</span>
-              <span className="text-xs font-medium text-muted">{label}</span>
+              <span className="leading-none">{emoji}</span>
+              <span className="text-[10px] uppercase tracking-wide text-black/70">{label}</span>
             </button>
           ))}
         </div>

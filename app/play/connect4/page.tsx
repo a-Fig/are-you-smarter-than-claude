@@ -117,15 +117,17 @@ export default function Connect4Page() {
       onRematch={rematch}
       error={error}
     >
-      <div className="grid grid-cols-7 gap-2 rounded-2xl border border-border bg-white/40 p-3">
+      <div className="grid grid-cols-7 gap-1 border-4 border-black bg-white p-3 shadow-[6px_6px_0_#000]">
         {Array.from({ length: COLS }, (_, c) => (
           <button
             key={c}
             onClick={() => play(c)}
             disabled={grid[0][c] !== null || thinking}
             aria-label={`Column ${c}`}
-            className={`flex flex-col items-center gap-2 rounded-xl p-1 transition-colors ${
-              grid[0][c] === null && !thinking ? "hover:bg-white/70" : ""
+            className={`flex flex-col items-center gap-2 border-2 border-transparent p-1 transition-colors ${
+              grid[0][c] === null && !thinking
+                ? "hover:border-black hover:bg-[#FF5C39]/15"
+                : ""
             }`}
           >
             {Array.from({ length: ROWS }, (_, r) => {
@@ -133,12 +135,12 @@ export default function Connect4Page() {
               return (
                 <span
                   key={r}
-                  className={`h-9 w-9 rounded-full border border-border ${
+                  className={`h-9 w-9 rounded-full border-2 border-black ${
                     cell === "R"
-                      ? "bg-foreground"
+                      ? "bg-black"
                       : cell === "Y"
-                        ? "bg-accent"
-                        : "bg-white/40"
+                        ? "bg-[#FF5C39]"
+                        : "bg-[#F5F0E8]"
                   }`}
                 />
               );
@@ -146,7 +148,9 @@ export default function Connect4Page() {
           </button>
         ))}
       </div>
-      <p className="text-xs text-muted">Your discs are black, Claude&apos;s are orange. Click a column to drop.</p>
+      <p className="font-sans text-xs font-bold uppercase tracking-wide text-black/60">
+        Your discs are black, Claude&apos;s are orange. Click a column to drop.
+      </p>
     </GameShell>
   );
 }

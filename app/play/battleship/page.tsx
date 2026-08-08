@@ -66,24 +66,24 @@ function Board({
   const remaining = fleet.length ? remainingShipSizes(fleet, shots) : SHIP_SIZES;
 
   return (
-    <div className="flex flex-col items-center gap-2">
-      <h2 className="text-sm font-medium">{title}</h2>
-      <div className="flex flex-col gap-1">
+    <div className="flex flex-col items-center gap-3">
+      <h2 className="text-sm uppercase tracking-[0.15em]">{title}</h2>
+      <div className="flex flex-col border-3 border-black bg-white shadow-[4px_4px_0_#000]">
         {INDEXES.map((row) => (
-          <div key={row} className="flex gap-1">
+          <div key={row} className="flex">
             {INDEXES.map((col) => {
               const shot = shotAt(shots, row, col);
               const isShip = revealShips && shipCells.has(`${row},${col}`);
               const live = !!onFire && !shot && !disabled;
               const tone = !shot
                 ? isShip
-                  ? "bg-foreground/15"
-                  : "bg-white/40"
+                  ? "bg-black"
+                  : "bg-white"
                 : shot.result === "miss"
-                  ? "bg-white/40"
+                  ? "bg-white"
                   : shot.result === "hit"
-                    ? "bg-accent"
-                    : "bg-foreground";
+                    ? "bg-[#FF5C39]"
+                    : "bg-black";
               return (
                 <button
                   key={col}
@@ -91,12 +91,13 @@ function Board({
                   onClick={onFire ? () => onFire(row, col) : undefined}
                   disabled={!live}
                   aria-label={`${title} cell ${row},${col}`}
-                  className={`flex h-8 w-8 items-center justify-center rounded-md border border-border transition-colors sm:h-9 sm:w-9 ${tone} ${
-                    live ? "cursor-pointer hover:border-accent hover:bg-white/80" : ""
+                  className={`flex h-8 w-8 items-center justify-center border border-black transition-colors sm:h-9 sm:w-9 ${tone} ${
+                    live ? "cursor-pointer hover:bg-[#FF5C39]/40" : ""
                   }`}
                 >
-                  {shot?.result === "miss" && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-muted" />
+                  {shot?.result === "miss" && <span className="h-1.5 w-1.5 bg-black" />}
+                  {shot?.result === "sunk" && (
+                    <span className="text-[11px] leading-none text-[#FF5C39]">✕</span>
                   )}
                 </button>
               );
@@ -104,7 +105,7 @@ function Board({
           </div>
         ))}
       </div>
-      <p className="text-xs text-muted">
+      <p className="font-sans text-xs font-bold uppercase tracking-wide text-black/60">
         {remaining.length ? `Afloat: ${remaining.join(" · ")}` : "All ships sunk"}
       </p>
     </div>
@@ -237,16 +238,16 @@ export default function BattleshipPage() {
         />
       </div>
 
-      <div className="flex flex-col items-center gap-2">
+      <div className="flex flex-col items-center gap-3">
         {!started && (
           <button
             onClick={shuffle}
-            className="rounded-full border border-border px-4 py-1.5 text-sm font-medium hover:border-accent"
+            className="border-3 border-black bg-white px-6 py-2 text-sm uppercase tracking-wide shadow-[4px_4px_0_#000] transition-[transform,box-shadow] duration-100 hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0_#000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
           >
             Shuffle fleet
           </button>
         )}
-        <p className="text-xs text-muted">
+        <p className="font-sans text-xs font-bold text-black/60">
           Click a cell in Claude&apos;s waters to fire. You shoot first.
         </p>
       </div>

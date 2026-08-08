@@ -1,36 +1,21 @@
 # Are You Smarter Than Claude?
 
-Mini-games against real Claude models — timed, scored, and cost-metered. Are you smarter? Faster? Definitely cheaper.
+Play tic-tac-toe, Connect Four, Battleship, Wordle Race, trivia, and rock-paper-scissors against real Claude models — Haiku 4.5, Sonnet 5, Opus 5 — with every match timed and cost-metered so you know exactly who was smarter, faster, and cheaper. It's built to make AI a little less mystical: you're not fighting a superintelligence, you're fighting an API call with opinions. Peter Thiel put it better than we can in *Zero to One*: "computers are complements for humans, not substitutes" — we're each good at different things, and playing side by side (or head to head) makes that obvious fast. So come find out where you actually stand.
 
 **Play now:** https://are-you-smarter-than-claude-123326946878.us-west1.run.app
 
-## Games
-
-- **Tic-Tac-Toe** — Classic strategy
-- **Connect Four** — Outwit the AI
-- **Battleship** — Hunt and hide
-- **Wordle Race** — Speed solving
-- **Trivia** — Movies, history, math, Bay Area
-
-## How It Works
-
-Play against real Claude models (Haiku 4.5, Sonnet 5, Opus 5) via server-side API calls. Each move records latency and token usage. See who's faster and who keeps the bill low.
-
 ## Run Locally
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
+```bash
+npm install
+```
 
-2. Add your Anthropic API key to `.env.local`:
-   ```
-   ANTHROPIC_API_KEY=sk-ant-...
-   ```
+Add your key to `.env.local`:
 
-3. Start the dev server:
-   ```bash
-   npm run dev
-   ```
+```
+ANTHROPIC_API_KEY=sk-ant-...
+```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+```bash
+npm run dev
+```

@@ -3,6 +3,7 @@ import { GAME_REGISTRY } from "@/lib/games/registry";
 import type { MoveResponse } from "@/lib/games/types";
 import { MODELS, costUsd, isModelKey } from "@/lib/models";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { checkDailyBudget, recordSpend } from "@/lib/costTracker";
 
 const MAX_ATTEMPTS = 3;
 const MAX_TOKENS = 300;
@@ -13,6 +14,11 @@ export async function POST(request: Request) {
       { error: "Server is missing its Claude API key." },
       { status: 500 },
     );
+  }
+
+  const overBudget = checkDailyBudget();
+  if (overBudget) {
+    return Response.json({ error: overBudget }, { status: 429 });
   }
 
   const ip =
@@ -118,6 +124,17 @@ export async function POST(request: Request) {
     }
   } catch (e) {
     if (e instanceof Anthropic.APIError) {
+      // Attempts before the failing one still consumed tokens — count them.
+      if (inputTokens > 0 || outputTokens > 0) {
+        recordSpend({
+          costUsd: costUsd(model, inputTokens, outputTokens),
+          game: engine.id,
+          model: model.apiId,
+          inputTokens,
+          outputTokens,
+          fallback: false,
+        });
+      }
       const status = e.status === 429 || e.status === 529 ? 503 : 502;
       return Response.json(
         { error: `Claude is unavailable right now (${e.status ?? "network"}).` },
@@ -133,6 +150,15 @@ export async function POST(request: Request) {
     trashTalk = "I fumbled that one. Lucky you.";
     fallback = true;
   }
+
+  recordSpend({
+    costUsd: costUsd(model, inputTokens, outputTokens),
+    game: engine.id,
+    model: model.apiId,
+    inputTokens,
+    outputTokens,
+    fallback,
+  });
 
   const payload: MoveResponse = {
     move,

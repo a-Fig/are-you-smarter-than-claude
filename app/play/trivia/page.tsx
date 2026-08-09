@@ -12,6 +12,7 @@ import { STAR_WARS_QUESTIONS } from "@/lib/games/trivia-starwars";
 import { MARVEL_QUESTIONS } from "@/lib/games/trivia-marvel";
 import { ANIME_QUESTIONS } from "@/lib/games/trivia-anime";
 import { EARTH_2026_QUESTIONS } from "@/lib/games/trivia-2026";
+import { WORLD_WARS_QUESTIONS } from "@/lib/games/trivia-worldwars";
 
 const ROUND_LENGTH = 10;
 
@@ -42,6 +43,7 @@ const CATEGORIES: Category[] = [
   { key: "marvel", label: "Marvel", blurb: "Mostly MCU", local: MARVEL_QUESTIONS, otdbId: null },
   { key: "anime", label: "Anime", blurb: "Major titles only", local: ANIME_QUESTIONS, otdbId: null },
   { key: "earth2026", label: "Earth in 2026", blurb: "Been reading the news?", local: EARTH_2026_QUESTIONS, otdbId: null },
+  { key: "worldwars", label: "World Wars", blurb: "1914-1945, both fronts", local: WORLD_WARS_QUESTIONS, otdbId: null },
   { key: "history", label: "History", blurb: "Dates and dynasties", otdbId: 23 },
   { key: "math", label: "Math", blurb: "Numbers, no calculator", otdbId: 19 },
   { key: "bayarea", label: "Bay Area", blurb: "Fog, bridges, ballparks", local: BAY_AREA_QUESTIONS, otdbId: null },

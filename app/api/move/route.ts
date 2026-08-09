@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const overBudget = checkDailyBudget();
+  const overBudget = await checkDailyBudget();
   if (overBudget) {
     return Response.json({ error: overBudget }, { status: 429 });
   }
@@ -126,7 +126,7 @@ export async function POST(request: Request) {
     if (e instanceof Anthropic.APIError) {
       // Attempts before the failing one still consumed tokens — count them.
       if (inputTokens > 0 || outputTokens > 0) {
-        recordSpend({
+        await recordSpend({
           costUsd: costUsd(model, inputTokens, outputTokens),
           game: engine.id,
           model: model.apiId,
@@ -151,7 +151,7 @@ export async function POST(request: Request) {
     fallback = true;
   }
 
-  recordSpend({
+  await recordSpend({
     costUsd: costUsd(model, inputTokens, outputTokens),
     game: engine.id,
     model: model.apiId,

@@ -73,10 +73,11 @@ export async function POST(request: Request) {
     },
   };
 
-  // Haiku 4.5 predates the disabled-thinking param; Sonnet 5 / Opus 5 think
-  // by default, which is slow and expensive for a game move — turn it off.
-  const thinking: Anthropic.ThinkingConfigParam | undefined =
-    modelKey === "haiku" ? undefined : { type: "disabled" };
+  // Difficulty gradient: Haiku plays on instinct (no thinking), Sonnet gets
+  // low-effort adaptive thinking, Opus medium. Forcing tool_choice suppresses
+  // thinking entirely (thinking_tokens: 0), so thinking tiers use "auto" and
+  // rely on the retry loop if a response ever skips the tool call.
+  const effort = modelKey === "haiku" ? null : modelKey === "sonnet" ? "low" : "medium";
 
   const start = Date.now();
   let inputTokens = 0;
@@ -95,11 +96,17 @@ export async function POST(request: Request) {
 
       const response = await client.messages.create({
         model: model.apiId,
-        max_tokens: MAX_TOKENS,
-        system: engine.systemPrompt,
-        ...(thinking ? { thinking } : {}),
+        // Thinking tokens count toward max_tokens; a truncated response
+        // means no tool call, so thinking tiers get generous headroom.
+        max_tokens: effort ? 5000 : MAX_TOKENS,
+        system:
+          engine.systemPrompt +
+          " Always submit your move by calling the make_move tool.",
+        ...(effort
+          ? { thinking: { type: "adaptive" }, output_config: { effort } }
+          : {}),
         tools: [tool],
-        tool_choice: { type: "tool", name: "make_move" },
+        tool_choice: effort ? { type: "auto" } : { type: "tool", name: "make_move" },
         messages: [{ role: "user", content: prompt }],
       });
 

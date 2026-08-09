@@ -7,6 +7,11 @@ import { requestClaudeMove, useMatchStats } from "@/lib/match";
 import type { ModelKey } from "@/lib/models";
 import type { TriviaMove, TriviaState } from "@/lib/games/trivia";
 import { BAY_AREA_QUESTIONS } from "@/lib/games/trivia-bayarea";
+import { ATLA_QUESTIONS } from "@/lib/games/trivia-atla";
+import { STAR_WARS_QUESTIONS } from "@/lib/games/trivia-starwars";
+import { MARVEL_QUESTIONS } from "@/lib/games/trivia-marvel";
+import { ANIME_QUESTIONS } from "@/lib/games/trivia-anime";
+import { EARTH_2026_QUESTIONS } from "@/lib/games/trivia-2026";
 
 const ROUND_LENGTH = 10;
 
@@ -20,15 +25,20 @@ interface Category {
   key: string;
   label: string;
   blurb: string;
-  /** Open Trivia Database category id, or null for the curated local set. */
+  /** Curated local question bank; when absent, `otdbId` names the Open Trivia Database category. */
+  local?: Question[];
   otdbId: number | null;
 }
 
 const CATEGORIES: Category[] = [
-  { key: "movies", label: "Movies", blurb: "Film buffs only", otdbId: 11 },
+  { key: "atla", label: "ATLA", blurb: "Yip yip, superfans", local: ATLA_QUESTIONS, otdbId: null },
+  { key: "starwars", label: "Star Wars", blurb: "A galaxy far, far away", local: STAR_WARS_QUESTIONS, otdbId: null },
+  { key: "marvel", label: "Marvel", blurb: "Mostly MCU", local: MARVEL_QUESTIONS, otdbId: null },
+  { key: "anime", label: "Anime", blurb: "Major titles only", local: ANIME_QUESTIONS, otdbId: null },
+  { key: "earth2026", label: "Earth in 2026", blurb: "Been reading the news?", local: EARTH_2026_QUESTIONS, otdbId: null },
   { key: "history", label: "History", blurb: "Dates and dynasties", otdbId: 23 },
   { key: "math", label: "Math", blurb: "Numbers, no calculator", otdbId: 19 },
-  { key: "bayarea", label: "Bay Area", blurb: "Fog, bridges, ballparks", otdbId: null },
+  { key: "bayarea", label: "Bay Area", blurb: "Fog, bridges, ballparks", local: BAY_AREA_QUESTIONS, otdbId: null },
 ];
 
 function shuffle<T>(items: T[]): T[] {
@@ -56,8 +66,8 @@ interface OpenTdbResult {
 }
 
 async function fetchQuestions(category: Category): Promise<Question[]> {
-  if (category.otdbId === null) {
-    return shuffle(BAY_AREA_QUESTIONS).slice(0, ROUND_LENGTH);
+  if (category.local || category.otdbId === null) {
+    return shuffle(category.local ?? []).slice(0, ROUND_LENGTH);
   }
 
   const res = await fetch(

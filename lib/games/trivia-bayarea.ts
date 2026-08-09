@@ -74,7 +74,8 @@ export const BAY_AREA_QUESTIONS: {
     correctIndex: 3,
   },
   {
-    question: "The world's first cable car line opened in 1873 on which San Francisco street?",
+    question:
+      "Andrew Hallidie's cable car line, the first in San Francisco, opened in 1873 along which street?",
     options: ["Powell Street", "Clay Street", "Market Street", "California Street"],
     correctIndex: 1,
   },
@@ -130,7 +131,7 @@ export const BAY_AREA_QUESTIONS: {
     correctIndex: 2,
   },
   {
-    question: "Which Bay Area team won three consecutive World Series in 1972, 1973 and 1974?",
+    question: "Which team won three consecutive World Series in 1972, 1973 and 1974?",
     options: [
       "The San Francisco Giants",
       "The Oakland Athletics",
@@ -167,8 +168,9 @@ export const BAY_AREA_QUESTIONS: {
     correctIndex: 1,
   },
   {
-    question: "Which animals have been kept in a paddock in Golden Gate Park since the 1890s?",
-    options: ["Elk", "Bison", "Alpacas", "Ostriches"],
+    question:
+      "Which animals have been kept continuously in a Golden Gate Park paddock since 1891?",
+    options: ["Zebras", "Bison", "Alpacas", "Ostriches"],
     correctIndex: 1,
   },
   {

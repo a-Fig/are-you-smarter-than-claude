@@ -66,8 +66,8 @@ function ReelTrack({
 }
 
 export default function Home() {
-  const adj = useReel(ADJS, 1900);
-  const model = useReel(MODELS, 1400);
+  const adj = useReel(ADJS, 2500);
+  const model = useReel(MODELS, 1850);
 
   return (
     <main className={styles.main}>

@@ -1,14 +1,36 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { GameShell } from "@/components/game/GameShell";
-import type { Outcome } from "@/components/game/ResultCard";
+import type { Outcome, RecapRow } from "@/components/game/ResultCard";
 import { requestClaudeMove, useMatchStats } from "@/lib/match";
 import type { ModelKey } from "@/lib/models";
 import { tictactoe, winner, type Cell, type TTTMove, type TTTState } from "@/lib/games/tictactoe";
 
 function toOutcome(w: "X" | "O" | "draw"): Outcome {
   return w === "X" ? "win" : w === "O" ? "loss" : "draw";
+}
+
+/** Same line table as the engine, plus a human-readable name for the recap. */
+const NAMED_LINES: [number, number, number, string][] = [
+  [0, 1, 2, "Top row"],
+  [3, 4, 5, "Middle row"],
+  [6, 7, 8, "Bottom row"],
+  [0, 3, 6, "Left column"],
+  [1, 4, 7, "Middle column"],
+  [2, 5, 8, "Right column"],
+  [0, 4, 8, "Diagonal"],
+  [2, 4, 6, "Diagonal"],
+];
+
+/** How the finished board was settled, e.g. "Middle column" or a full-board draw. */
+function decidedBy(board: Cell[]): string {
+  for (const [a, b, c, label] of NAMED_LINES) {
+    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+      return `${label} — three in a row`;
+    }
+  }
+  return "Draw — board full";
 }
 
 export default function TicTacToePage() {
@@ -81,6 +103,22 @@ export default function TicTacToePage() {
     [board, thinking, outcome, model, endHumanTurn, recordClaudeMove, startHumanTurn],
   );
 
+  const recap = useMemo<RecapRow[] | undefined>(() => {
+    if (!outcome) return undefined;
+    const xs = board.filter((c) => c === "X").length;
+    const os = board.filter((c) => c === "O").length;
+    return [
+      { label: "Decided by", value: decidedBy(board) },
+      {
+        label: "Squares taken",
+        you: `${xs}`,
+        claude: `${os}`,
+        winner: outcome === "win" ? "you" : outcome === "loss" ? "claude" : "tie",
+      },
+      { label: "Squares left", value: `${9 - xs - os} of 9` },
+    ];
+  }, [outcome, board]);
+
   return (
     <GameShell
       title="Tic-Tac-Toe"
@@ -93,6 +131,7 @@ export default function TicTacToePage() {
       outcome={outcome}
       onRematch={rematch}
       error={error}
+      recap={recap}
     >
       <div className="grid grid-cols-3 gap-3">
         {board.map((cell, i) => (

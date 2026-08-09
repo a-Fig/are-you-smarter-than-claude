@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { GameShell } from "@/components/game/GameShell";
-import type { Outcome } from "@/components/game/ResultCard";
+import type { Outcome, RecapRow } from "@/components/game/ResultCard";
 import { requestClaudeMove, useMatchStats } from "@/lib/match";
 import type { ModelKey } from "@/lib/models";
 import type { TriviaMove, TriviaState } from "@/lib/games/trivia";
@@ -14,6 +14,12 @@ import { ANIME_QUESTIONS } from "@/lib/games/trivia-anime";
 import { EARTH_2026_QUESTIONS } from "@/lib/games/trivia-2026";
 
 const ROUND_LENGTH = 10;
+
+/** Who got a given question right, recorded once the round is revealed. */
+interface QuestionResult {
+  you: boolean;
+  claude: boolean;
+}
 
 interface Question {
   question: string;
@@ -98,8 +104,7 @@ export default function TriviaPage() {
   const [index, setIndex] = useState(0);
   const [humanPick, setHumanPick] = useState<number | null>(null);
   const [claudePick, setClaudePick] = useState<number | null>(null);
-  const [humanScore, setHumanScore] = useState(0);
-  const [claudeScore, setClaudeScore] = useState(0);
+  const [results, setResults] = useState<QuestionResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [thinking, setThinking] = useState(false);
   const [trashTalk, setTrashTalk] = useState<string | null>(null);
@@ -110,6 +115,9 @@ export default function TriviaPage() {
 
   const current: Question | undefined = questions[index];
   const revealed = claudePick !== null;
+  // Scores are derived from the per-question log so the two can't drift.
+  const humanScore = results.filter((r) => r.you).length;
+  const claudeScore = results.filter((r) => r.claude).length;
 
   const askClaude = useCallback(
     async (question: Question, cat: Category, pick: number) => {
@@ -126,8 +134,13 @@ export default function TriviaPage() {
         setTrashTalk(r.trashTalk || null);
         const answer = (r.move as TriviaMove).answer_index;
         setClaudePick(answer);
-        if (pick === question.correctIndex) setHumanScore((s) => s + 1);
-        if (answer === question.correctIndex) setClaudeScore((s) => s + 1);
+        setResults((prev) => [
+          ...prev,
+          {
+            you: pick === question.correctIndex,
+            claude: answer === question.correctIndex,
+          },
+        ]);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Something went wrong.");
       } finally {
@@ -180,8 +193,7 @@ export default function TriviaPage() {
         setIndex(0);
         setHumanPick(null);
         setClaudePick(null);
-        setHumanScore(0);
-        setClaudeScore(0);
+        setResults([]);
         setTrashTalk(null);
         startHumanTurn();
       } catch (e) {
@@ -199,14 +211,27 @@ export default function TriviaPage() {
     setIndex(0);
     setHumanPick(null);
     setClaudePick(null);
-    setHumanScore(0);
-    setClaudeScore(0);
+    setResults([]);
     setTrashTalk(null);
     setOutcome(null);
     setError(null);
     setThinking(false);
     resetStats();
   }, [resetStats]);
+
+  const recap: RecapRow[] | undefined = outcome
+    ? [
+        {
+          label: "Final score",
+          you: `${humanScore}/${results.length}`,
+          claude: `${claudeScore}/${results.length}`,
+          winner: outcome === "win" ? "you" : outcome === "loss" ? "claude" : "tie",
+        },
+        { label: "You", value: results.map((r) => (r.you ? "✓" : "✗")).join("") },
+        { label: "Claude", value: results.map((r) => (r.claude ? "✓" : "✗")).join("") },
+        ...(category ? [{ label: "Category", value: category.label }] : []),
+      ]
+    : undefined;
 
   return (
     <GameShell
@@ -220,6 +245,10 @@ export default function TriviaPage() {
       outcome={outcome}
       onRematch={rematch}
       error={error}
+      recap={recap}
+      // The player already clicks "See results" after the last reveal, so the
+      // board has been seen — no extra hold before the result card.
+      revealDelayMs={0}
     >
       {!category || !current ? (
         <div className="flex w-full max-w-md flex-col gap-5">

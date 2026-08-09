@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { GameShell } from "@/components/game/GameShell";
-import type { Outcome } from "@/components/game/ResultCard";
+import type { Outcome, RecapRow } from "@/components/game/ResultCard";
 import { requestClaudeMove, useMatchStats } from "@/lib/match";
 import type { ModelKey } from "@/lib/models";
 import {
@@ -100,6 +100,27 @@ export default function RPSPage() {
     return w === "human" ? "You win the round!" : "Claude takes it.";
   })();
 
+  const recap: RecapRow[] | undefined = outcome
+    ? [
+        {
+          label: "Rounds won",
+          you: String(humanWins),
+          claude: String(claudeWins),
+          winner: outcome === "win" ? "you" : outcome === "loss" ? "claude" : "tie",
+        },
+        { label: "Ties", value: String(rounds.length - humanWins - claudeWins) },
+        {
+          label: "Round history",
+          value: rounds
+            .map((r) => {
+              const w = roundWinner(r);
+              return w === "human" ? "W" : w === "claude" ? "L" : "T";
+            })
+            .join(" "),
+        },
+      ]
+    : undefined;
+
   return (
     <GameShell
       title="Rock-Paper-Scissors"
@@ -112,6 +133,7 @@ export default function RPSPage() {
       outcome={outcome}
       onRematch={rematch}
       error={error}
+      recap={recap}
     >
       <div className="flex flex-col items-center gap-6">
         <p className="text-xs uppercase tracking-wide sm:text-sm">

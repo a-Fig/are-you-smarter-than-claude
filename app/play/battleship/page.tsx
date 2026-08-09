@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { GameShell } from "@/components/game/GameShell";
-import type { Outcome } from "@/components/game/ResultCard";
+import type { Outcome, RecapRow } from "@/components/game/ResultCard";
 import { requestClaudeMove, useMatchStats } from "@/lib/match";
 import type { ModelKey } from "@/lib/models";
 import {
@@ -20,6 +20,24 @@ import {
 } from "@/lib/games/battleship";
 
 const INDEXES = Array.from({ length: BOARD_SIZE }, (_, i) => i);
+
+/** A "sunk" entry covers every cell of the ship, so non-misses are hits. */
+function hitCount(shots: Shot[]): number {
+  return shots.filter((s) => s.result !== "miss").length;
+}
+
+function sunkCount(fleet: Fleet, shots: Shot[]): number {
+  return fleet.length - remainingShipSizes(fleet, shots).length;
+}
+
+function hitRate(shots: Shot[]): number {
+  return shots.length ? hitCount(shots) / shots.length : 0;
+}
+
+function betterSide(you: number, claude: number): RecapRow["winner"] {
+  if (you === claude) return "tie";
+  return you > claude ? "you" : "claude";
+}
 
 interface Fleets {
   human: Fleet;
@@ -207,6 +225,39 @@ export default function BattleshipPage() {
     ],
   );
 
+  const recap = useMemo<RecapRow[] | undefined>(() => {
+    if (!outcome) return undefined;
+    const yourSunk = sunkCount(fleets.claude, humanShots);
+    const claudeSunk = sunkCount(fleets.human, claudeShots);
+    const pct = (shots: Shot[]) =>
+      shots.length ? `${Math.round(hitRate(shots) * 100)}%` : "—";
+    return [
+      {
+        label: "Ships sunk",
+        you: `${yourSunk} / ${fleets.claude.length}`,
+        claude: `${claudeSunk} / ${fleets.human.length}`,
+        winner: betterSide(yourSunk, claudeSunk),
+      },
+      {
+        label: "Shots fired",
+        you: `${humanShots.length}`,
+        claude: `${claudeShots.length}`,
+      },
+      {
+        label: "Hits landed",
+        you: `${hitCount(humanShots)}`,
+        claude: `${hitCount(claudeShots)}`,
+        winner: betterSide(hitCount(humanShots), hitCount(claudeShots)),
+      },
+      {
+        label: "Hit rate",
+        you: pct(humanShots),
+        claude: pct(claudeShots),
+        winner: betterSide(hitRate(humanShots), hitRate(claudeShots)),
+      },
+    ];
+  }, [outcome, fleets, humanShots, claudeShots]);
+
   return (
     <GameShell
       title="Battleship"
@@ -219,13 +270,14 @@ export default function BattleshipPage() {
       outcome={outcome}
       onRematch={rematch}
       error={error}
+      recap={recap}
     >
       <div className="flex flex-col items-center gap-8 sm:flex-row sm:items-start">
         <Board
           title="Claude's waters"
           shots={humanShots}
           fleet={hydrated ? fleets.claude : []}
-          revealShips={false}
+          revealShips={!!outcome}
           onFire={fire}
           disabled={thinking || !!outcome || !hydrated}
         />

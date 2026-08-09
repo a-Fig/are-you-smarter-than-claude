@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { GameShell } from "@/components/game/GameShell";
-import type { Outcome } from "@/components/game/ResultCard";
+import type { Outcome, RecapRow } from "@/components/game/ResultCard";
 import { requestClaudeMove, useMatchStats } from "@/lib/match";
 import type { ModelKey } from "@/lib/models";
 import { scoreGuess, type WordleMove, type WordleState } from "@/lib/games/wordle";
@@ -46,6 +46,29 @@ function Board({
     );
   });
   return <div className="flex flex-col gap-1.5">{rows}</div>;
+}
+
+function greens(feedback: string): number {
+  return feedback.split("").filter((c) => c === "G").length;
+}
+
+/**
+ * The guess that got closest to the answer. Ties go to the later guess — by
+ * then the guesser knew more, so it reads as the better attempt.
+ */
+function closestGuess(
+  guesses: string[],
+  feedback: string[],
+): { word: string; greens: number } | null {
+  let best = -1;
+  let bestGreens = -1;
+  feedback.forEach((fb, i) => {
+    if (greens(fb) >= bestGreens) {
+      bestGreens = greens(fb);
+      best = i;
+    }
+  });
+  return best < 0 ? null : { word: guesses[best].toUpperCase(), greens: bestGreens };
 }
 
 function toOutcome(humanSolved: boolean, claudeSolved: boolean): Outcome {
@@ -164,76 +187,112 @@ export default function WordlePage() {
 
   const guessesLeft = MAX_GUESSES - humanGuesses.length;
 
-  return (
-    <>
-      <GameShell
-        title="Wordle Race"
-        model={model}
-        onModelChange={setModel}
-        modelLocked={started}
-        stats={stats}
-        thinking={thinking}
-        trashTalk={trashTalk}
-        outcome={outcome}
-        onRematch={rematch}
-        error={error}
-      >
-        <div className="flex flex-col items-center gap-8 sm:flex-row sm:items-start sm:justify-center">
-          <div className="flex flex-col items-center gap-3">
-            <span className="border-2 border-black bg-white px-3 py-0.5 text-xs uppercase tracking-[0.2em] shadow-[3px_3px_0_#000]">
-              You
-            </span>
-            <Board guesses={humanGuesses} feedback={humanFeedback} revealed />
-          </div>
-          <div className="flex flex-col items-center gap-3">
-            <span className="border-2 border-black bg-white px-3 py-0.5 text-xs uppercase tracking-[0.2em] shadow-[3px_3px_0_#000]">
-              Claude
-            </span>
-            <Board guesses={claudeGuesses} feedback={claudeFeedback} revealed={!!outcome} />
-          </div>
-        </div>
+  const recap = useMemo<RecapRow[] | undefined>(() => {
+    if (!outcome) return undefined;
+    const humanSolved = humanFeedback.includes("GGGGG");
+    const claudeSolved = claudeFeedback.includes("GGGGG");
+    const yourBest = closestGuess(humanGuesses, humanFeedback);
+    const claudeBest = closestGuess(claudeGuesses, claudeFeedback);
+    return [
+      { label: "The word", value: secret.toUpperCase() },
+      {
+        label: "Solved it",
+        you: humanSolved ? `In ${humanGuesses.length}` : "Never",
+        claude: claudeSolved ? `In ${claudeGuesses.length}` : "Never",
+        winner:
+          humanSolved === claudeSolved ? "tie" : humanSolved ? "you" : "claude",
+      },
+      ...(yourBest && claudeBest
+        ? [
+            {
+              label: "Closest guess",
+              you: `${yourBest.word} · ${yourBest.greens}/5`,
+              claude: `${claudeBest.word} · ${claudeBest.greens}/5`,
+              winner:
+                yourBest.greens === claudeBest.greens
+                  ? ("tie" as const)
+                  : yourBest.greens > claudeBest.greens
+                    ? ("you" as const)
+                    : ("claude" as const),
+            },
+          ]
+        : []),
+      {
+        label: "Rounds played",
+        value: `${Math.max(humanGuesses.length, claudeGuesses.length)} of ${MAX_GUESSES}`,
+      },
+    ];
+  }, [outcome, secret, humanGuesses, humanFeedback, claudeGuesses, claudeFeedback]);
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            void submitGuess();
-          }}
-          className="flex items-center gap-3"
-        >
-          <input
-            type="text"
-            value={input}
-            maxLength={5}
-            disabled={thinking || !!outcome || guessesLeft <= 0}
-            onChange={(e) => setInput(e.target.value.replace(/[^a-zA-Z]/g, "").toLowerCase())}
-            placeholder="guess"
-            autoFocus
-            className="w-36 border-3 border-black bg-white px-4 py-2 text-center text-lg uppercase tracking-widest text-black shadow-[3px_3px_0_#000] outline-none placeholder:text-black/30 focus:border-black disabled:opacity-50"
-          />
-          <button
-            type="submit"
-            disabled={thinking || !!outcome || input.length !== 5}
-            className="border-3 border-black bg-[#FF5C39] px-6 py-2 text-sm uppercase tracking-wide shadow-[4px_4px_0_#000] transition-[transform,box-shadow] duration-100 hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0_#000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none disabled:translate-x-0 disabled:translate-y-0 disabled:opacity-40 disabled:shadow-[4px_4px_0_#000]"
-          >
-            Guess
-          </button>
-        </form>
-        <p className="font-sans text-xs font-bold text-black/60">
-          Guess the secret 5-letter word before Claude does. {guessesLeft} guess
-          {guessesLeft === 1 ? "" : "es"} left.
-        </p>
-      </GameShell>
-      {outcome && (
-        <div className="flex justify-center bg-[#F5F0E8] pb-10">
-          <p className="border-2 border-black bg-white px-4 py-2 text-center font-sans text-sm font-bold text-black shadow-[3px_3px_0_#000]">
-            The word was{" "}
-            <span className="border-2 border-black bg-[#FF5C39] px-1.5 uppercase">
-              {secret.toUpperCase()}
-            </span>
-            .
-          </p>
+  return (
+    <GameShell
+      title="Wordle Race"
+      model={model}
+      onModelChange={setModel}
+      modelLocked={started}
+      stats={stats}
+      thinking={thinking}
+      trashTalk={trashTalk}
+      outcome={outcome}
+      onRematch={rematch}
+      error={error}
+      recap={recap}
+    >
+      <div className="flex flex-col items-center gap-8 sm:flex-row sm:items-start sm:justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <span className="border-2 border-black bg-white px-3 py-0.5 text-xs uppercase tracking-[0.2em] shadow-[3px_3px_0_#000]">
+            You
+          </span>
+          <Board guesses={humanGuesses} feedback={humanFeedback} revealed />
         </div>
+        <div className="flex flex-col items-center gap-3">
+          <span className="border-2 border-black bg-white px-3 py-0.5 text-xs uppercase tracking-[0.2em] shadow-[3px_3px_0_#000]">
+            Claude
+          </span>
+          <Board guesses={claudeGuesses} feedback={claudeFeedback} revealed={!!outcome} />
+        </div>
+      </div>
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          void submitGuess();
+        }}
+        className="flex items-center gap-3"
+      >
+        <input
+          type="text"
+          value={input}
+          maxLength={5}
+          disabled={thinking || !!outcome || guessesLeft <= 0}
+          onChange={(e) => setInput(e.target.value.replace(/[^a-zA-Z]/g, "").toLowerCase())}
+          placeholder="guess"
+          autoFocus
+          className="w-36 border-3 border-black bg-white px-4 py-2 text-center text-lg uppercase tracking-widest text-black shadow-[3px_3px_0_#000] outline-none placeholder:text-black/30 focus:border-black disabled:opacity-50"
+        />
+        <button
+          type="submit"
+          disabled={thinking || !!outcome || input.length !== 5}
+          className="border-3 border-black bg-[#FF5C39] px-6 py-2 text-sm uppercase tracking-wide shadow-[4px_4px_0_#000] transition-[transform,box-shadow] duration-100 hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0_#000] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none disabled:translate-x-0 disabled:translate-y-0 disabled:opacity-40 disabled:shadow-[4px_4px_0_#000]"
+        >
+          Guess
+        </button>
+      </form>
+      <p className="font-sans text-xs font-bold text-black/60">
+        Guess the secret 5-letter word before Claude does. {guessesLeft} guess
+        {guessesLeft === 1 ? "" : "es"} left.
+      </p>
+      {/* Lives with the board so it shows during the reveal window and in
+          board review; the result card carries the answer in its recap. */}
+      {outcome && (
+        <p className="border-2 border-black bg-white px-4 py-2 text-center font-sans text-sm font-bold text-black shadow-[3px_3px_0_#000]">
+          The word was{" "}
+          <span className="border-2 border-black bg-[#FF5C39] px-1.5 uppercase">
+            {secret.toUpperCase()}
+          </span>
+          .
+        </p>
       )}
-    </>
+    </GameShell>
   );
 }

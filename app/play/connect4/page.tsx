@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { GameShell } from "@/components/game/GameShell";
-import type { Outcome } from "@/components/game/ResultCard";
+import type { Outcome, RecapRow } from "@/components/game/ResultCard";
 import { requestClaudeMove, useMatchStats } from "@/lib/match";
 import type { ModelKey } from "@/lib/models";
 import {
@@ -33,6 +33,33 @@ function dropDisc(grid: Disc[][], col: number, disc: Disc): Disc[][] {
 
 function toOutcome(w: "R" | "Y" | "draw"): Outcome {
   return w === "R" ? "win" : w === "Y" ? "loss" : "draw";
+}
+
+/** Same scan as the engine's `winner`, but reports the shape of the winning four. */
+function decidedBy(grid: Disc[][]): string {
+  const directions: [number, number, string][] = [
+    [0, 1, "Horizontal four"],
+    [1, 0, "Vertical four"],
+    [1, 1, "Diagonal four"],
+    [1, -1, "Diagonal four"],
+  ];
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const disc = grid[r][c];
+      if (!disc) continue;
+      for (const [dr, dc, label] of directions) {
+        let count = 1;
+        for (let step = 1; step < 4; step++) {
+          const rr = r + dr * step;
+          const cc = c + dc * step;
+          if (rr < 0 || rr >= ROWS || cc < 0 || cc >= COLS || grid[rr][cc] !== disc) break;
+          count++;
+        }
+        if (count === 4) return label;
+      }
+    }
+  }
+  return "Draw — board full";
 }
 
 export default function Connect4Page() {
@@ -104,6 +131,25 @@ export default function Connect4Page() {
     [grid, thinking, outcome, model, endHumanTurn, recordClaudeMove, startHumanTurn],
   );
 
+  const recap = useMemo<RecapRow[] | undefined>(() => {
+    if (!outcome) return undefined;
+    const flat = grid.flat();
+    const reds = flat.filter((d) => d === "R").length;
+    const yellows = flat.filter((d) => d === "Y").length;
+    const openCols = grid[0].filter((d) => d === null).length;
+    return [
+      { label: "Decided by", value: decidedBy(grid) },
+      {
+        label: "Discs played",
+        you: `${reds}`,
+        claude: `${yellows}`,
+        winner: outcome === "win" ? "you" : outcome === "loss" ? "claude" : "tie",
+      },
+      { label: "Board filled", value: `${reds + yellows} of ${ROWS * COLS}` },
+      { label: "Columns still open", value: `${openCols} of ${COLS}` },
+    ];
+  }, [outcome, grid]);
+
   return (
     <GameShell
       title="Connect Four"
@@ -116,6 +162,7 @@ export default function Connect4Page() {
       outcome={outcome}
       onRematch={rematch}
       error={error}
+      recap={recap}
     >
       <div className="grid grid-cols-7 gap-1 border-4 border-black bg-white p-3 shadow-[6px_6px_0_#000]">
         {Array.from({ length: COLS }, (_, c) => (
